@@ -1,0 +1,7 @@
+# macOS + nix build noise
+.DS_Store
+result
+result-*
+
+# home-manager adoption backups stay local
+**/*.backup
