@@ -95,6 +95,11 @@ in
     extraConfig = ''
       set -g default-terminal "tmux-256color"
       set -ag terminal-overrides ",xterm-256color:RGB"   # true color for the theme
+      # why: inside tmux, Shift-Enter otherwise submits an agent prompt instead of adding a line, and a finished
+      # agent cannot notify the outer window; Claude Code documents these three lines for tmux.
+      set -g allow-passthrough on
+      set -s extended-keys on
+      set -as terminal-features "xterm*:extkeys"
     '';
   };
 
