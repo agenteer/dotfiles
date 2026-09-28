@@ -4,6 +4,8 @@ One folder that sets up a Mac for working with coding agents: the settings, the 
 
 This is a template. Build from it first, then edit the files.
 
+**Follow the walkthrough:** [Watch the YouTube video](https://www.youtube.com/watch?v=V6F_JJnnKLI) · [Read the companion guide](https://agenteer.com/learn/tutorials/mac-setup-agentic-engineering/). The video shows the original setup; use this README for the current installation and update commands.
+
 Under the hood: [Nix](https://nixos.org) installs the software and pins the versions in `flake.lock`, [nix-darwin](https://github.com/nix-darwin/nix-darwin) writes the Mac settings, [home-manager](https://home-manager.dev) sets up your account, and [Homebrew](https://brew.sh) supplies the Mac apps.
 
 ## What the build puts on the Mac
