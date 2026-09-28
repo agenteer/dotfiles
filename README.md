@@ -1,6 +1,6 @@
 # dotfiles
 
-One folder that sets up a Mac for working with coding agents: the settings, the apps, the command-line tools, and three coding agents ([Claude Code](https://code.claude.com/docs), [Codex](https://github.com/openai/codex), [opencode](https://opencode.ai)). On a fresh Mac, run one script to set it up. After that, edit a file and run `./rebuild.sh`. The files are commented.
+One folder that sets up a Mac for working with coding agents: the settings, the apps, the command-line tools, and four coding agents ([Claude Code](https://code.claude.com/docs), [Codex](https://github.com/openai/codex), [opencode](https://opencode.ai), [Pi](https://github.com/earendil-works/pi)). On a fresh Mac, run one script to set it up. After that, edit a file and run `rebuild`. The files are commented.
 
 This is a template. Build from it first, then edit the files.
 
@@ -12,15 +12,15 @@ Under the hood: [Nix](https://nixos.org) installs the software and pins the vers
 - Mac settings, and Touch ID for `sudo`.
 - [Homebrew](https://brew.sh), and the Mac apps it installs: [Ghostty](https://ghostty.org), a terminal. Add your own apps to the same list.
 - The [Hack Nerd Font](https://www.nerdfonts.com).
-- Command-line tools: [ripgrep](https://github.com/BurntSushi/ripgrep) (search inside files), [jq](https://jqlang.org) (read JSON), [lazygit](https://github.com/jesseduffield/lazygit) (git on one screen), git, and [gh](https://cli.github.com) (GitHub from the terminal).
-- [Neovim](https://neovim.io), a text editor that runs inside the terminal. New to it: open it and type `:Tutor`, its own half-hour lesson.
-- [tmux](https://github.com/tmux/tmux/wiki): keeps terminal sessions running when you close the window, so an agent started inside it keeps working.
+- Command-line tools: [ripgrep](https://github.com/BurntSushi/ripgrep) (search inside files), [jq](https://jqlang.org) (read JSON), [lazygit](https://github.com/jesseduffield/lazygit) (git on one screen), git, [gh](https://cli.github.com) (GitHub from the terminal), and [uv](https://docs.astral.sh/uv/) (Python projects and dependencies).
+- [Neovim](https://neovim.io) with [LazyVim](https://www.lazyvim.org): file search, completion, language tools, formatting and Git access inside the terminal. Node.js, Python, language servers, formatters and compiled parsers are supplied by Nix. New to the editor: run `nvim`, then type `:Tutor` and press Enter.
+- [tmux](https://github.com/tmux/tmux/wiki): detach and reconnect to running sessions while the Mac remains running. Saves window/pane layouts and working directories for recovery into fresh shells; running agents are not restarted after a reboot.
 - [zsh](https://www.zsh.org), the Mac's default shell, with a [starship](https://starship.rs) prompt.
-- Coding agents: [Claude Code](https://code.claude.com/docs), [Codex](https://github.com/openai/codex), and [opencode](https://opencode.ai), with one shared instructions file, `home/AGENTS.md`.
+- Coding agents: [Claude Code](https://code.claude.com/docs), [Codex](https://github.com/openai/codex), [opencode](https://opencode.ai), and [Pi](https://github.com/earendil-works/pi), with one shared instructions file, `home/AGENTS.md`.
 
 ## Read this before you run it
 
-- **Fresh Mac setup.** The instructions below set up a fresh Mac. Read `configuration.nix` and `home.nix` to see the system settings, applications and user configuration they apply.
+- **Fresh Mac setup.** The instructions below set up a fresh Mac. Read `configuration.nix`, `home.nix` and `modules/` to see the system settings, applications and user configuration they apply.
 - **Tested on [Apple Silicon](https://support.apple.com/en-us/116943).** Apple menu → About This Mac shows which chip you have. On an Intel Mac, change `system = "aarch64-darwin";` in `flake.nix` to `"x86_64-darwin"`.
 - **Your username.** The script writes your macOS username into `flake.nix`. Your git name and email are not in the folder, and git refuses your first commit until you add them. See "Make it yours" below.
 - **No secrets live here.** Run each agent once and it walks you through signing in. This folder holds no keys, tokens, or passwords.
@@ -68,13 +68,15 @@ It takes a few minutes. When it finishes, open a new terminal window; existing w
 
 ## After that
 
-Two commands after the first build. Run `./rebuild.sh` after you edit a file in the folder; the edit takes effect at the rebuild. Run `./update.sh` when you changed nothing but newer versions exist.
+In a new terminal, `rebuild` and `update` work from any directory. They call this repository’s scripts through `~/.dotfiles`. Use `rebuild` to apply your declarations with the existing lock; use `update` to select newer Nix inputs, apply both configurations and upgrade Ghostty. The scripts can also be run directly from the repository.
+
+Start with the [editor, terminal and shortcuts guide](docs/editor-workflow.md). [Optional tools](docs/optional-tools.md) explains Prime Agent and additional app choices.
 
 Both `./rebuild.sh` and `./update.sh` activate the system configuration, so either may ask for Touch ID or your password. Run them while you can respond.
 
 ### Change something
 
-Edit `configuration.nix` (the system and the apps) or `home.nix` (your tools and shell), then:
+Edit `configuration.nix` for system settings and apps, `home.nix` for tools and shell, or `modules/` for editor and terminal settings. Then apply the change:
 
 ```sh
 ./rebuild.sh
@@ -97,9 +99,11 @@ git commit -m "Update Nix inputs"
 
 The script stops at the first failure. Check the resulting environment before committing the new lock. It does not automatically commit, delete old Nix generations, or run Homebrew Bundle cleanup to uninstall undeclared apps or zap their data. Homebrew may still clean old versions and caches during upgrades.
 
-**Update ownership:** Nix packages follow `flake.lock`. This template currently disables Ghostty's native updater in `home.nix`, so `update.sh` explicitly upgrades Ghostty through Homebrew. Ghostty is the only Homebrew app included here. If you add more applications, decide which updater owns each one: either its native updater or a named Homebrew upgrade in `update.sh`. Do not assume every application updates only through this script. macOS and App Store updates remain separate, as does the Determinate Nix runtime.
+**Update ownership:** Nix packages follow `flake.lock`. This template currently disables Ghostty's native updater in `modules/terminal.nix`, so `update.sh` explicitly upgrades Ghostty through Homebrew. Ghostty is the only Homebrew app included here. If you add more applications, decide which updater owns each one: either its native updater or a named Homebrew upgrade in `update.sh`. Do not assume every application updates only through this script. macOS and App Store updates remain separate, as does the Determinate Nix runtime.
 
 Homebrew application versions are not pinned by `flake.lock`; they may change independently. Rebuilding a Nix generation does not restore an earlier GUI-app version or application data. See [Homebrew's update behavior](https://docs.brew.sh/FAQ#how-do-i-update-my-local-packages).
+
+A weekly reminder to run this attended maintenance is a useful starting point. Choose your own day in your calendar or reminders app; this template does not install a scheduler. Editor plugins have a separate lock and update procedure in the [workflow guide](docs/editor-workflow.md#updates).
 
 ### Go back
 
@@ -122,9 +126,10 @@ brew install <tool>         # remains installed; declare it if it belongs in you
 
 ### Make it yours
 
-- **Git identity.** Add `settings.user = { name = "..."; email = "..."; };` to the `programs.git` block in `home.nix`.
+- **Git identity.** Add `programs.git.settings.user = { name = "Your Name"; email = "you@example.com"; };` inside the main attribute set in `home.nix`, then run `rebuild`.
 - **GitHub, once.** `gh auth login`, choose SSH, and let it generate and upload a key for this Mac. Then point your copy at its SSH address, `git remote set-url origin git@github.com:YOUR-NAME/YOUR-REPO.git`, and `git push` then uses the SSH key instead of asking for a login.
-- **Apps.** One line each in `configuration.nix`.
+- **Apps.** One line each in `configuration.nix`; record the update owner as described above.
+- **Keep personal changes private.** If your copy will contain personal infrastructure details, create a private repository from this template. Keep credentials outside both the repository and Nix expressions; private Git is not a secret store.
 
 ## What it does not cover
 
@@ -139,8 +144,11 @@ What you still do by hand:
 
 - `flake.nix`: the entry point. What the folder depends on, which release each dependency follows, and the one `user =` line.
 - `configuration.nix`: the system. macOS settings, the font, Touch ID for `sudo`, Homebrew and its app list. Needs your password to apply.
-- `home.nix`: your account. Command-line tools, the three coding agents, zsh, the prompt, tmux, and the links into `home/`. No password.
-- `home/`: the config files that get linked into place. Neovim, `.claude/settings.json`, and `AGENTS.md`, one instructions file read by all three agents.
+- `home.nix`: your account. Command-line tools, four coding agents, zsh, the prompt and shared instructions. Imports the editor and terminal modules. User activation does not run as root.
+- `modules/editor.nix`: Neovim, language tools and Nix-owned parsers.
+- `modules/terminal.nix`: Ghostty and tmux, including layout recovery.
+- `home/`: linked configuration, including the LazyVim plugin lock, `.claude/settings.json`, and the instructions file shared by all four agents.
+- `docs/`: everyday workflow, shortcuts and optional setup.
 - `bootstrap.sh`: the first build on a fresh Mac.
 - `rebuild.sh`: applies a change to `configuration.nix` or `home.nix`.
 - `update.sh`: updates the lock, invokes `rebuild.sh` for both configurations, then upgrades Homebrew-owned Ghostty.
