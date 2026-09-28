@@ -55,11 +55,14 @@
   # why: the Mac apps only Homebrew has - things with a window and an icon - declared here so the app list is auditable.
   homebrew = {
     enable = true;
-    onActivation.cleanup = "zap";  # every rebuild removes any Homebrew app not on this list, leftovers included
-    onActivation.autoUpdate = false;  # a rebuild does exactly what the diff says; the Mac apps move only when ./update.sh asks
-    # why --force: if an app on the list is already on the Mac from a by-hand install, replace it
-    # with the listed one instead of stopping the build. On a fresh Mac this flag does nothing.
-    onActivation.extraFlags = [ "--force" ];
+    # why: applying configuration must not upgrade or remove existing Homebrew software.
+    # Uninstall an app explicitly when you intend to remove it; never zap its data during a rebuild.
+    onActivation = {
+      autoUpdate = false;
+      upgrade = false;
+      cleanup = "none";
+      extraFlags = [ ];
+    };
     # why: only what Nix cannot install from the formula side; the coding agents are in home.nix, pinned by flake.lock.
     brews = [ ];       # command-line programs from Homebrew; empty on purpose, the command-line tools come from Nix
     casks = [

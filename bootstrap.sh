@@ -61,8 +61,8 @@ sudo "$NIX_BIN" run github:nix-darwin/nix-darwin/nix-darwin-26.05#darwin-rebuild
 # (Determinate adds nix to new shells' PATH) and re-run ./bootstrap.sh.
 
 echo "==> Step 6: first home-manager switch (your account: tools, shell, the three coding agents)"
-# why the reverse of rebuild.sh's order: on a fresh Mac there is nothing for Homebrew's cleanup to take
-# away, and the system step has to run first anyway to put Homebrew itself on the machine.
+# why this first-build order: the system step puts Homebrew itself on the machine.
+# Later rebuilds build both configurations before activating either one.
 # The other half of the machine, and it asks for no password: it activates nothing as root.
 # Fetched for this one run, the same way step 5 fetches darwin-rebuild, because the home-manager command
 # is itself one of the things this step installs.

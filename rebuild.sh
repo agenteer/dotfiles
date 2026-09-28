@@ -1,25 +1,38 @@
 #!/usr/bin/env bash
-# Every change after the first build: one command. It applies both halves of the machine, in order.
-# Two separate steps, not one: if the second fails, the first has still happened.
+# Apply the existing lock to both halves. Build failures stop before either activation.
+# Activation is sequential, not atomic: a system activation failure can follow a successful account activation.
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-ln -sfn "$DIR" ~/.dotfiles
+cd "$DIR"
 
-# why your account goes FIRST: the system step below has Homebrew remove every app not on its list, so when
-# a tool moves from a Homebrew line to a Nix line, the Nix one is in place before Homebrew takes the old one away.
-# why no password here: this half activates nothing as root.
-# why "-b backup": if a file this folder manages already exists by hand, rename it and carry on.
-echo "==> Your account"
-if command -v home-manager >/dev/null 2>&1; then
-  home-manager switch --flake ~/.dotfiles -b backup
-else
-  # why: the very first time, the home-manager command is what we are about to install, so it cannot be
-  # the thing that installs it. This line fetches it for one run; every later run takes the branch above.
-  nix run home-manager/release-26.05 -- switch --flake ~/.dotfiles -b backup
+# These are flake output names, not the computer's display name.
+DARWIN_HOST="${DARWIN_HOST:-mac}"
+HM_PROFILE="${HM_PROFILE:-$(id -un)}"
+
+if ! command -v home-manager >/dev/null 2>&1; then
+  echo "home-manager is missing. Finish ./bootstrap.sh first, then open a new terminal." >&2
+  exit 1
 fi
 
-# why the password here: this half activates as root, which is why it is the one you sit and watch.
-# Full path on purpose: darwin-rebuild lives in /run/current-system/sw/bin, which an older
-# terminal window (or sudo) may not have on its path.
+# ln -sfn would put a link inside an existing directory, not replace it.
+# Preserve legacy data and require an intentional migration of this location.
+if [[ -e "$HOME/.dotfiles" && ! -L "$HOME/.dotfiles" ]]; then
+  echo "Refusing to replace existing ~/.dotfiles data; preserve and migrate it before rebuilding." >&2
+  exit 1
+fi
+
+echo "==> Build both configurations from flake.lock"
+nix build --no-link --no-update-lock-file \
+  ".#darwinConfigurations.\"${DARWIN_HOST}\".system" \
+  ".#homeConfigurations.\"${HM_PROFILE}\".activationPackage"
+
+# home.nix's links use this stable location. Change it only after both builds succeed.
+ln -sfn "$DIR" "$HOME/.dotfiles"
+
+# No root activation here. Preserve a colliding hand-written file with the existing backup policy.
+echo "==> Your account"
+home-manager switch --no-update-lock-file --flake ".#${HM_PROFILE}" -b backup
+
+# Full path: an older shell or sudo may not have darwin-rebuild on PATH.
 echo "==> System (Touch ID, or your password)"
-sudo /run/current-system/sw/bin/darwin-rebuild switch --flake ~/.dotfiles#mac
+sudo /run/current-system/sw/bin/darwin-rebuild switch --no-update-lock-file --flake ".#${DARWIN_HOST}"
