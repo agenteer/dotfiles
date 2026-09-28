@@ -27,12 +27,13 @@ in
     lazygit     # a full-screen git view: every change an agent made, staged and committed with one key
     git         # version control
     gh          # GitHub from the terminal
-    # why: the three coding agents come from the daily package set, not the pinned May one, because they ship
-    # several times a week and a month-old agent is a worse agent.
-    # Which day's build you get is still fixed by flake.lock, so ./update.sh moves them and the diff shows it.
+    uv          # Python project environments and dependencies
+    # why: coding agents use the newer package set, with exact revisions still fixed by flake.lock.
+    # ./update.sh deliberately refreshes those revisions and applies both configurations.
     pkgsUnstable.claude-code   # Claude Code (the command is `claude`)
     pkgsUnstable.codex         # OpenAI Codex
-    pkgsUnstable.opencode      # the open-source harness; the third reader of the one instructions file
+    pkgsUnstable.opencode      # the open-source harness
+    pkgsUnstable.pi-coding-agent # Pi CLI; project SDK dependencies are installed separately
   ];
   # why: the font is NOT here but in configuration.nix - a font in this list is a file macOS never looks at.
 
@@ -56,16 +57,18 @@ in
       ''
         bindkey '^f' autosuggest-accept
       ''
-      # why: read ~/.zshrc last. Anything an installer put there works; ./whats-not-declared.sh shows it to you.
+      # why: read ~/.zshrc last. Anything an installer put there works; ./whats-not-declared.sh reports its presence without printing secrets.
       (lib.mkOrder 1500 ''
         [ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc"
       '')
     ];
-    # why: three shortcuts, and only three - the ones typed dozens of times a day. The agents do the rest of git.
+    # why: frequent commands, including maintenance from any working directory.
     shellAliases = {
       ".." = "cd ..";
       pull = "git pull";
       st = "git status";   # git status, typed often
+      rebuild = ''"$HOME/.dotfiles/rebuild.sh"'';
+      update = ''"$HOME/.dotfiles/update.sh"'';
     };
   };
 
@@ -96,5 +99,7 @@ in
   home.file.".codex/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  home.file.".pi/agent/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 }

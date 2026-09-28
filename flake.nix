@@ -24,7 +24,7 @@
       user = "your-username";
       # why: the kind of Mac, named once so both halves below agree. An Intel Mac changes this one word to "x86_64-darwin".
       system = "aarch64-darwin";
-      # why: the pinned package set, used for everything in home.nix except the three agents.
+      # why: the pinned package set, used for everything in home.nix except coding agents and Treesitter plugins/parsers.
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
@@ -47,7 +47,7 @@
         ];
       };
 
-      # why: this half is YOUR ACCOUNT - tools, shell, editor, and the three coding agents.
+      # why: this half is YOUR ACCOUNT - tools, shell, editor, and coding agents.
       # why it needs no password: it activates nothing as root. (Nix still writes to /nix and to your
       # profile through its daemon, so the honest claim is "no root activation", not "touches nothing".)
       # why the name is your username: `home-manager switch --flake ~/.dotfiles` then finds it on its own.

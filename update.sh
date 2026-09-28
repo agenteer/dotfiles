@@ -14,7 +14,7 @@ fi
 nix flake update
 ./rebuild.sh
 
-# Ghostty is the template's only Homebrew app; home.nix disables its native updater.
+# Ghostty is the template's only Homebrew app; modules/terminal.nix disables its native updater.
 # Explicit --greedy includes this self-updating cask under Homebrew ownership.
 # If you add apps, choose their update owner; do not add native-owned apps to this command.
 brew update
