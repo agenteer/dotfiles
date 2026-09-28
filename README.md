@@ -95,7 +95,7 @@ git add flake.lock
 git commit -m "Update Nix inputs"
 ```
 
-The script stops at the first failure. Check the resulting environment before committing the new lock. It does not automatically commit, delete old generations, or run Homebrew cleanup or zap.
+The script stops at the first failure. Check the resulting environment before committing the new lock. It does not automatically commit, delete old Nix generations, or run Homebrew Bundle cleanup to uninstall undeclared apps or zap their data. Homebrew may still clean old versions and caches during upgrades.
 
 **Update ownership:** Nix packages follow `flake.lock`. This template currently disables Ghostty's native updater in `home.nix`, so `update.sh` explicitly upgrades Ghostty through Homebrew. Ghostty is the only Homebrew app included here. If you add more applications, decide which updater owns each one: either its native updater or a named Homebrew upgrade in `update.sh`. Do not assume every application updates only through this script. macOS and App Store updates remain separate, as does the Determinate Nix runtime.
 
