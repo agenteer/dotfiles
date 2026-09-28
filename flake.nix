@@ -29,7 +29,7 @@
         inherit system;
         config.allowUnfree = true;
       };
-      # why: the newest package set, used only for the three coding agents in home.nix.
+      # why: the newer pinned package set supplies coding agents and compatible editor parsers.
       pkgsUnstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;

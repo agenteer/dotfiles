@@ -5,6 +5,12 @@ set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
+# Preserve a pre-existing directory or file before installing or activating anything.
+if [[ -e "$HOME/.dotfiles" && ! -L "$HOME/.dotfiles" ]]; then
+  echo "Existing ~/.dotfiles data found. Preserve it and choose the configuration location before setup." >&2
+  exit 1
+fi
+
 echo "==> Step 1: Determinate Nix"
 if command -v nix >/dev/null 2>&1; then
   echo "    nix already installed, skipping"

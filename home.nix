@@ -6,6 +6,9 @@ let
 in
 
 {
+  imports = [ ./modules/editor.nix ./modules/terminal.nix ];
+  _module.args.dotfilesRoot = dotfiles;
+
   home.username = user;
   home.homeDirectory = "/Users/${user}";
   # why: records the defaults home-manager started with; set once at install.
@@ -24,7 +27,6 @@ in
     lazygit     # a full-screen git view: every change an agent made, staged and committed with one key
     git         # version control
     gh          # GitHub from the terminal
-    neovim      # the editor
     # why: the three coding agents come from the daily package set, not the pinned May one, because they ship
     # several times a week and a month-old agent is a worse agent.
     # Which day's build you get is still fixed by flake.lock, so ./update.sh moves them and the diff shows it.
@@ -85,42 +87,8 @@ in
     };
   };
 
-  # why: several agent sessions side by side that survive a closed window, a quit terminal, or a dropped
-  # remote connection; the one multiplexer Claude Code's own split-pane mode runs on.
-  programs.tmux = {
-    enable = true;
-    keyMode = "vi";           # h/j/k/l in copy mode, like the editor
-    mouse = true;             # click a pane to focus it; scroll agent output
-    escapeTime = 0;           # Esc reaches Neovim at once instead of after a pause
-    extraConfig = ''
-      set -g default-terminal "tmux-256color"
-      set -ag terminal-overrides ",xterm-256color:RGB"   # true color for the theme
-      # why: inside tmux, Shift-Enter otherwise submits an agent prompt instead of adding a line, and a finished
-      # agent cannot notify the outer window; Claude Code documents these three lines for tmux.
-      set -g allow-passthrough on
-      set -s extended-keys on
-      set -as terminal-features "xterm*:extkeys"
-    '';
-  };
-
-  # why: edit in place — the real file stays in this repo; ~/.config just points at it.
-  home.file.".config/nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
-
-  # why: the terminal's settings, written by the folder into ~/.config/ghostty/config. The app itself comes from
-  # Homebrew (package = null: nixpkgs has no Mac build). auto-update off: nothing this folder installs updates on its own.
-  # A hand-written config in ~/Library/Application Support/com.mitchellh.ghostty wins over this file - delete it first.
-  programs.ghostty = {
-    enable = true;
-    package = null;
-    settings = {
-      auto-update = "off";
-      font-family = "Hack Nerd Font";
-      font-size = 15;
-    };
-  };
 
   # why: one instructions file, AGENTS.md, linked into the place each agent reads its own from.
   home.file.".claude/CLAUDE.md".source =

@@ -1,3 +1,1 @@
-require('options')
-require('keys')
-require('plugins-bootstrap')
+require("config.lazy")

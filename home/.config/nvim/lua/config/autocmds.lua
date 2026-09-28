@@ -1,0 +1,2 @@
+-- Keep LazyVim's external-file checks; never force-reload a modified buffer.
+-- Project EditorConfig and native language ftplugins retain indentation ownership.

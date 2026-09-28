@@ -1,0 +1,2 @@
+-- Use upstream LazyVim mappings; Space opens the discoverable which-key menu.
+-- tmux keeps Control-B; no unprefixed global navigation is added.
