@@ -20,7 +20,7 @@ Under the hood: [Nix](https://nixos.org) installs the software and pins the vers
 
 ## Read this before you run it
 
-- **The bootstrap is for a fresh Mac.** The original setup was tested on a fresh Apple Silicon Mac. A general migration procedure for an existing Mac has not yet been tested. Do not run the bootstrap as a migration shortcut: it changes system settings and user configuration. Rebuilds leave undeclared Homebrew software installed because [cleanup is disabled](https://nix-darwin.github.io/nix-darwin/manual/index.html#opt-homebrew.onActivation.cleanup), but that safeguard does not make the whole setup an existing-Mac installer. Existing application conflicts can stop activation rather than being force-replaced.
+- **Fresh Mac setup.** The instructions below set up a fresh Mac. Read `configuration.nix` and `home.nix` to see the system settings, applications and user configuration they apply.
 - **Tested on [Apple Silicon](https://support.apple.com/en-us/116943).** Apple menu → About This Mac shows which chip you have. On an Intel Mac, change `system = "aarch64-darwin";` in `flake.nix` to `"x86_64-darwin"`.
 - **Your username.** The script writes your macOS username into `flake.nix`. Your git name and email are not in the folder, and git refuses your first commit until you add them. See "Make it yours" below.
 - **No secrets live here.** Run each agent once and it walks you through signing in. This folder holds no keys, tokens, or passwords.
